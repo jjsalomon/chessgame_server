@@ -38,19 +38,27 @@ public class Server extends javax.swing.JFrame {
 
         @Override
         public void run(){
-            String message, connect = "Connect", disconnect = "Disconnect", chat = "Chat";
+            String message, connect = "Connect", disconnect = "Disconnect", chat = "Chat", register = "Register",
+            login = "Login";
             String[] data;
 
             try {
                 while ((message = reader.readLine()) != null) {
                     ta_chat.append("Received: " + message + "\n");
                     data = message.split(":");
+                    System.out.println(message);
 
+                    //jelo
+                    //has connected
+                    //Connect
                     for (String token : data) {
                         ta_chat.append(token + "\n");
                     }
 
+                    //if user is valid connection
                     if (data[2].equals(connect)) {
+                        //Data:
+                        // username: hasConnected: chat
                         tellEveryone((data[0] + ":" + data[1] + ":" + chat));
                         userAdd(data[0]);
                     } else if (data[2].equals(connect)) {
@@ -58,6 +66,8 @@ public class Server extends javax.swing.JFrame {
                         userRemove(data[0]);
                     } else if (data[2].equals(chat)) {
                         tellEveryone(message);
+                    } else if(data[2].equals(register)){
+                        registerUser(data[0] + ":" + data[1]);
                     } else {
                         ta_chat.append("No conditions were met. \n");
                     }
@@ -280,6 +290,7 @@ public class Server extends javax.swing.JFrame {
         tellEveryone(done);
     }
 
+    //Sending data function
     public void tellEveryone(String message)
     {
         Iterator it = clientOutputStreams.iterator();
@@ -290,6 +301,7 @@ public class Server extends javax.swing.JFrame {
             {
                 PrintWriter writer = (PrintWriter) it.next();
                 writer.println(message);
+                System.out.println(message);
                 ta_chat.append("Sending: " + message + "\n");
                 writer.flush();
                 ta_chat.setCaretPosition(ta_chat.getDocument().getLength());
@@ -298,6 +310,30 @@ public class Server extends javax.swing.JFrame {
             catch (Exception ex)
             {
                 ta_chat.append("Error telling everyone. \n");
+            }
+        }
+    }
+
+    public void registerUser(String message){
+        /*SQL code here
+        *
+        *
+        */
+        String[] data;
+        data = message.split(":");
+
+        Iterator it = clientOutputStreams.iterator();
+
+        while(it.hasNext()){
+            PrintWriter writer =(PrintWriter) it.next();
+
+            //if data[0] == sql username && data[1] == sql password
+            //already exists
+            if(data[0] == message && data[1] == message) {
+                System.out.println(message);
+            }else{
+                //insert into database
+                //send validation
             }
         }
     }
