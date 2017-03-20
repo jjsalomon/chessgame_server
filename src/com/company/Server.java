@@ -315,12 +315,11 @@ public class Server extends javax.swing.JFrame {
     }
 
     public void registerUser(String message){
-        /*SQL code here
-        *
-        *
-        */
         String[] data;
         data = message.split(":");
+
+        String sqlUsername = "SELECT * where username =" +data[0];
+        String sqlPassword = "SELECT * where password =" +data[1];
 
         Iterator it = clientOutputStreams.iterator();
 
@@ -328,9 +327,8 @@ public class Server extends javax.swing.JFrame {
             PrintWriter writer =(PrintWriter) it.next();
 
             //if data[0] == sql username && data[1] == sql password
-            //already exists
-            if(data[0] == message && data[1] == message) {
-                System.out.println(message);
+            if(data[0] == sqlUsername && data[1] == sqlPassword) {
+                //Account already exists
             }else{
                 //insert into database
                 //send validation
