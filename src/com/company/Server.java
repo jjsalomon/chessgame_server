@@ -7,12 +7,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Scanner;
 
 /**
  * Created by azkei on 16/03/2017.
  */
-public class Server extends javax.swing.JFrame {
 
+public class Server extends javax.swing.JFrame {
 
     ArrayList clientOutputStreams;
     ArrayList<String> users;
@@ -39,9 +40,9 @@ public class Server extends javax.swing.JFrame {
         @Override
         public void run(){
             String message, connect = "Connect", disconnect = "Disconnect", chat = "Chat", register = "Register",
-            login = "Login";
+                    login = "Login";
             String[] data;
-
+            System.out.println("Test");
             try {
                 while ((message = reader.readLine()) != null) {
                     ta_chat.append("Received: " + message + "\n");
@@ -67,6 +68,7 @@ public class Server extends javax.swing.JFrame {
                     } else if (data[2].equals(chat)) {
                         tellEveryone(message);
                     } else if(data[2].equals(register)){
+                        System.out.println("Registering..");
                         registerUser(data[0] + ":" + data[1]);
                     } else {
                         ta_chat.append("No conditions were met. \n");
@@ -76,13 +78,13 @@ public class Server extends javax.swing.JFrame {
                 ta_chat.append("Lost a connection. \n");
                 e.printStackTrace();
                 clientOutputStreams.remove(client);
-                }
             }
         }
+    }
 
-        public Server(){
-            initializeComponents();
-        }
+    public Server(){
+        initializeComponents();
+    }
 
 
     //GUI Components
@@ -219,6 +221,10 @@ public class Server extends javax.swing.JFrame {
 
     public static void main(String args[])
     {
+        //instantiate SQL, and create tables
+        mySQLDB connect = new mySQLDB();
+        connect.createTable();
+
         java.awt.EventQueue.invokeLater(new Runnable()
         {
             @Override
@@ -226,6 +232,7 @@ public class Server extends javax.swing.JFrame {
                 new Server().setVisible(true);
             }
         });
+
     }
 
     public class ServerStart implements Runnable
@@ -315,25 +322,41 @@ public class Server extends javax.swing.JFrame {
     }
 
     public void registerUser(String message){
+        mySQLDB connect = new mySQLDB();
+        boolean valid;
+
         String[] data;
         data = message.split(":");
 
-        String sqlUsername = "SELECT * where username =" +data[0];
-        String sqlPassword = "SELECT * where password =" +data[1];
+        String username = data[0];
+        String password = data[1];
 
-        Iterator it = clientOutputStreams.iterator();
-
-        while(it.hasNext()){
-            PrintWriter writer =(PrintWriter) it.next();
-
-            //if data[0] == sql username && data[1] == sql password
-            if(data[0] == sqlUsername && data[1] == sqlPassword) {
-                //Account already exists
-            }else{
-                //insert into database
-                //send validation
-            }
+        //returns valid true if insert in to database  of false
+        valid = connect.insertData(username, password);
+        if (valid) {
+            System.out.println("Register success");
+            //send validation
+        } else {
+            //Account already exists
+            System.out.println("Register fail");
         }
+
+//        String sqlUsername = "SELECT * where username =" +data[0];
+//        String sqlPassword = "SELECT * where password =" +data[1];
+//
+//        Iterator it = clientOutputStreams.iterator();
+//
+//        while(it.hasNext()){
+//            PrintWriter writer =(PrintWriter) it.next();
+//
+//            //if data[0] == sql username && data[1] == sql password
+//            if(data[0] == sqlUsername && data[1] == sqlPassword) {
+//                //Account already exists
+//            }else{
+//                //insert into database
+//                //send validation
+//            }
+//        }
     }
 
 
