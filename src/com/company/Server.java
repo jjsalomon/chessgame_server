@@ -2,12 +2,10 @@ package com.company;
 
 import javax.swing.*;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Scanner;
 
 /**
  * Created by azkei on 16/03/2017.
@@ -39,27 +37,25 @@ public class Server extends javax.swing.JFrame {
 
         @Override
         public void run(){
-            String message, connect = "Connect", disconnect = "Disconnect", chat = "Chat", register = "Register",
-                    login = "Login";
+
+
+            String message,
+                    connect = "Connect", disconnect = "Disconnect",
+                    chat = "Chat", register = "Register", login = "Login";
+
             String[] data;
-            System.out.println("Test");
             try {
                 while ((message = reader.readLine()) != null) {
+
                     ta_chat.append("Received: " + message + "\n");
                     data = message.split(":");
-                    System.out.println(message);
 
-                    //jelo
-                    //has connected
-                    //Connect
                     for (String token : data) {
                         ta_chat.append(token + "\n");
                     }
 
                     //if user is valid connection
                     if (data[2].equals(connect)) {
-                        //Data:
-                        // username: hasConnected: chat
                         tellEveryone((data[0] + ":" + data[1] + ":" + chat));
                         userAdd(data[0]);
                     } else if (data[2].equals(connect)) {
@@ -68,9 +64,10 @@ public class Server extends javax.swing.JFrame {
                     } else if (data[2].equals(chat)) {
                         tellEveryone(message);
                     } else if(data[2].equals(register)){
-                        System.out.println("Registering..");
-                        registerUser(data[0] + ":" + data[1]);
-                    } else {
+                        registerUser(data[0] + ":" + data[1],client);
+                    } else if(data[2].equals(login)){
+                        loginUser(data[0] + ":" + data[1],client);
+                    }else{
                         ta_chat.append("No conditions were met. \n");
                     }
                 }
@@ -321,7 +318,7 @@ public class Server extends javax.swing.JFrame {
         }
     }
 
-    public void registerUser(String message){
+    public void loginUser(String message, PrintWriter client){
         mySQLDB connect = new mySQLDB();
         boolean valid;
 
@@ -331,34 +328,44 @@ public class Server extends javax.swing.JFrame {
         String username = data[0];
         String password = data[1];
 
-        //returns valid true if insert in to database  of false
-        valid = connect.insertData(username, password);
-        if (valid) {
-            System.out.println("Register success");
-            //send validation
-        } else {
-            //Account already exists
-            System.out.println("Register fail");
+        valid = connect.Login(username,password);
+        if(valid){
+            ta_chat.append(data[0]+" has successfully logged in");
+            client.println(data[0]+" You have logged in, Welcome !" + ":Login");
+            client.flush();
+        }else{
+            ta_chat.append(data[0]+" has failed to log in, Invalid Credentials");
+            client.println(data[0]+" You have failed to log in, Invalid Credentials!" + ":Login");
+            client.flush();
         }
-
-//        String sqlUsername = "SELECT * where username =" +data[0];
-//        String sqlPassword = "SELECT * where password =" +data[1];
-//
-//        Iterator it = clientOutputStreams.iterator();
-//
-//        while(it.hasNext()){
-//            PrintWriter writer =(PrintWriter) it.next();
-//
-//            //if data[0] == sql username && data[1] == sql password
-//            if(data[0] == sqlUsername && data[1] == sqlPassword) {
-//                //Account already exists
-//            }else{
-//                //insert into database
-//                //send validation
-//            }
-//        }
     }
 
+    public void registerUser(String message, PrintWriter client){
+        mySQLDB connect = new mySQLDB();
+        boolean valid;
 
 
+        String[] data;
+        data = message.split(":");
+
+        String username = data[0];
+        String password = data[1];
+
+        //returns valid true if insert in to database  of false
+        valid = connect.insertData(username, password);
+        //if the SQL insert, inserted properly...
+        if (valid) {
+            ta_chat.append(data[0]+" has been registered");
+            client.println(data[0]+" has been registered."+":Message");
+            client.flush();
+
+        } else {
+            //If insert failed
+            System.out.println("Register fail");
+            ta_chat.append(data[0]+"has failed to register");
+            client.println(data[0]+" has failed to register."+":Message");
+            client.flush();
+        }
+
+    }
 }
