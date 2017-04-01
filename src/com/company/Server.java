@@ -15,6 +15,7 @@ public class Server extends javax.swing.JFrame {
 
     ArrayList clientOutputStreams;
     ArrayList<String> users;
+    ArrayList onlineStreams;
 
     public class ClientHandler implements Runnable {
 
@@ -46,14 +47,12 @@ public class Server extends javax.swing.JFrame {
             String[] data;
             try {
                 while ((message = reader.readLine()) != null) {
-
                     ta_chat.append("Received: " + message + "\n");
                     data = message.split(":");
 
                     for (String token : data) {
                         ta_chat.append(token + "\n");
                     }
-
                     //if user is valid connection
                     if (data[2].equals(connect)) {
                         tellEveryone((data[0] + ":" + data[1] + ":" + chat));
@@ -115,6 +114,7 @@ public class Server extends javax.swing.JFrame {
         b_start.setText("START");
         b_start.addActionListener(new java.awt.event.ActionListener(){
             public void actionPerformed(java.awt.event.ActionEvent evt){
+
                 b_startActionPerformed(evt);
             }
         });
@@ -238,6 +238,7 @@ public class Server extends javax.swing.JFrame {
         public void run()
         {
             clientOutputStreams = new ArrayList();
+            onlineStreams = new ArrayList();
             users = new ArrayList();
 
             try
@@ -333,6 +334,8 @@ public class Server extends javax.swing.JFrame {
             ta_chat.append(data[0]+" has successfully logged in");
             client.println(data[0]+" You have logged in, Welcome !" + ":Login");
             client.flush();
+            //adding logged in users to the array list.
+            onlineStreams.add(client);
         }else{
             ta_chat.append(data[0]+" has failed to log in, Invalid Credentials");
             client.println(data[0]+" You have failed to log in, Invalid Credentials!" + ":Login");
@@ -343,14 +346,10 @@ public class Server extends javax.swing.JFrame {
     public void registerUser(String message, PrintWriter client){
         mySQLDB connect = new mySQLDB();
         boolean valid;
-
-
         String[] data;
         data = message.split(":");
-
         String username = data[0];
         String password = data[1];
-
         //returns valid true if insert in to database  of false
         valid = connect.insertData(username, password);
         //if the SQL insert, inserted properly...
@@ -358,7 +357,6 @@ public class Server extends javax.swing.JFrame {
             ta_chat.append(data[0]+" has been registered");
             client.println(data[0]+" has been registered."+":Message");
             client.flush();
-
         } else {
             //If insert failed
             System.out.println("Register fail");
@@ -366,6 +364,5 @@ public class Server extends javax.swing.JFrame {
             client.println(data[0]+" has failed to register."+":Message");
             client.flush();
         }
-
     }
 }
