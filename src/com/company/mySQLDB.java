@@ -97,11 +97,11 @@ public class mySQLDB {
             int row = pstmt.executeUpdate();
             //validate if registration account succeed return greater than 0
             if (row > 0) {
-                //create profile
-                int rank = 0;
-                int win = 0;
-                int loss = 0;
-                int coins = 0;
+                //create profile // initialise to 0 .. dummy numbers for now
+                int rank = 1;
+                int win = 11;
+                int loss = 2;
+                int coins = 11340;
                 String rewardID = "";
                 String status = "";
                 String img = "";
@@ -135,7 +135,7 @@ public class mySQLDB {
 
     //Method to view selected user profile /read data
     //server should be able to send this back to client
-    public boolean viewProfile(String username) {
+    public String[] viewProfile(String username) {
         try {
             getConnection();
             pstmt = conn.prepareStatement("SELECT * FROM profile WHERE username = ?");
@@ -147,32 +147,32 @@ public class mySQLDB {
             if (res.next()) {
                 System.out.println(username + " profile");
                 //Retrieve by column name
-                int ID = res.getInt("userID");
+//                int ID = res.getInt("userID");
                 int rank = res.getInt("rank");
                 int win = res.getInt("win");
                 int loss = res.getInt("loss");
                 int coins = res.getInt("coins");
-                String rewardID = res.getString("rewardID");
-                String status = res.getString("status");
-                String img = res.getString("image");
+//                String rewardID = res.getString("rewardID");
+//                String status = res.getString("status");
+//                String img = res.getString("image");
 
                 //Display values
-                System.out.println("UserID: " + ID);
+//                System.out.println("UserID: " + ID);
                 System.out.println("Username: " + username);
                 System.out.println("Rank: " + rank);
                 System.out.println("Win: " + win);
                 System.out.println("Loss: " + loss);
                 System.out.println("Coins: " + coins);
-                System.out.println("Skin: " + rewardID);
-                System.out.println("Status: " + status);
-                System.out.println("Image: " + img);
+//                System.out.println("Skin: " + rewardID);
+//                System.out.println("Status: " + status);
+//                System.out.println("Image: " + img);
 
-                return true;
+                return new String[] { username, String.valueOf(rank), String.valueOf(win), String.valueOf(loss), String.valueOf(coins)};
             } else {
-                return false;
+                return new String[] { "" };
             }
         } catch (Exception e) {
-            return false;
+            return new String[] { "" };
         } finally {
             closeRsc();
         }
