@@ -351,7 +351,7 @@ public class Server extends javax.swing.JFrame {
         data = message.split(":");
         String username = data[0];
         String password = data[1];
-        //returns valid true if insert in to database  of fals\e
+        //returns valid true if insert in to database  of false
         valid = connect.insertData(username, password);
         //if the SQL insert, inserted properly...
         if (valid) {
@@ -361,7 +361,7 @@ public class Server extends javax.swing.JFrame {
         } else {
             //If insert failed
             System.out.println("Register fail");
-            ta_chat.append(data[0]+"has failed to register");
+            ta_chat.append(data[0]+" has failed to register");
             client.println(data[0]+" has failed to register."+":Message");
             client.flush();
         }
