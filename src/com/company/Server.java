@@ -343,14 +343,15 @@ public class Server extends javax.swing.JFrame {
         }
     }
 
-    public void registerUser(String message, PrintWriter client){
+    public void
+    registerUser(String message, PrintWriter client){
         mySQLDB connect = new mySQLDB();
         boolean valid;
         String[] data;
         data = message.split(":");
         String username = data[0];
         String password = data[1];
-        //returns valid true if insert in to database  of false
+        //returns valid true if insert in to database  of fals\e
         valid = connect.insertData(username, password);
         //if the SQL insert, inserted properly...
         if (valid) {
