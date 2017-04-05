@@ -331,11 +331,11 @@ public class Server extends javax.swing.JFrame {
 
         valid = connect.Login(username,password);
         if(valid){
-            //accDetails holds account details (username,rank,win,loss,coins respectively)
+            //accDetails holds account details (username,rank,win,loss,coins,skins respectively)
             String[] accDetails;
             accDetails = connect.viewProfile(username);
             ta_chat.append(data[0]+" has successfully logged in");
-            client.println(data[0]+" You have logged in, Welcome !" + ":Login"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]);
+            client.println(data[0]+" You have logged in, Welcome !" + ":Login"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]+ ":"+ accDetails[5]);
             client.flush();
             //adding logged in users to the array list.
             onlineStreams.add(client);

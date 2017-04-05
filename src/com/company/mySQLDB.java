@@ -47,9 +47,9 @@ public class mySQLDB {
             //create preparedStatement
             pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS account(ID INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(20) NOT NULL UNIQUE, password VARCHAR(20) NOT NULL)");
             pstmt.executeUpdate();
-            pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS profile(userID INTEGER PRIMARY KEY AUTOINCREMENT, rank int(11) NOT NULL, win int(11) NOT NULL, loss int(11) NOT NULL, coins int(11) NOT NULL, username varchar(20) NOT NULL, FOREIGN KEY(username) REFERENCES account(username))");
+            pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS profile(userID INTEGER PRIMARY KEY AUTOINCREMENT, rank int(11) NOT NULL, win int(11) NOT NULL, loss int(11) NOT NULL, coins int(11) NOT NULL, username varchar(20) NOT NULL,skins varchar(20), FOREIGN KEY(username) REFERENCES account(username))");
             pstmt.executeUpdate();
-            //  , rewardID varchar(20) NOT NULL, status varchar(10),image BLOB
+            //  , skin varchar(20) NOT NULL, status varchar(10),image BLOB
         } catch (Exception e) {
             //e.printStackTrace();
             //System.out.println(e);
@@ -102,16 +102,16 @@ public class mySQLDB {
                 int win = 11;
                 int loss = 2;
                 int coins = 11340;
-                String rewardID = "";
+                String skins = "";
                 String status = "";
                 String img = "";
-                pstmt = conn.prepareStatement("INSERT INTO profile(rank,win,loss,coins,username) VALUES(?,?,?,?,?)");
+                pstmt = conn.prepareStatement("INSERT INTO profile(rank,win,loss,coins,username,skins) VALUES(?,?,?,?,?,?)");
                 pstmt.setInt(1, rank);
                 pstmt.setInt(2, win);
                 pstmt.setInt(3, loss);
                 pstmt.setInt(4, coins);
                 pstmt.setString(5, username);
-//                pstmt.setString(6, rewardID);
+                pstmt.setString(6, skins);
 //                pstmt.setString(7, status);
 //                pstmt.setString(8, img);
                 row = pstmt.executeUpdate();
@@ -152,7 +152,7 @@ public class mySQLDB {
                 int win = res.getInt("win");
                 int loss = res.getInt("loss");
                 int coins = res.getInt("coins");
-//                String rewardID = res.getString("rewardID");
+                String skins = res.getString("skins");
 //                String status = res.getString("status");
 //                String img = res.getString("image");
 
@@ -163,11 +163,11 @@ public class mySQLDB {
                 System.out.println("Win: " + win);
                 System.out.println("Loss: " + loss);
                 System.out.println("Coins: " + coins);
-//                System.out.println("Skin: " + rewardID);
+                System.out.println("Skin: " + skins);
 //                System.out.println("Status: " + status);
 //                System.out.println("Image: " + img);
 
-                return new String[] { username, String.valueOf(rank), String.valueOf(win), String.valueOf(loss), String.valueOf(coins)};
+                return new String[] { username, String.valueOf(rank), String.valueOf(win), String.valueOf(loss), String.valueOf(coins),skins};
             } else {
                 return new String[] { "" };
             }
