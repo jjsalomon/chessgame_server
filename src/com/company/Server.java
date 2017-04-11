@@ -17,11 +17,13 @@ public class Server extends javax.swing.JFrame {
     ArrayList<String> users;
     ArrayList onlineStreams;
 
+
     public class ClientHandler implements Runnable {
 
         BufferedReader reader;
         Socket socket;
         PrintWriter client;
+        ObjectOutputStream dos;
 
 
         public ClientHandler(Socket clientSocket, PrintWriter user) {
@@ -38,7 +40,6 @@ public class Server extends javax.swing.JFrame {
 
         @Override
         public void run(){
-
 
             String message,
                     connect = "Connect", disconnect = "Disconnect",
@@ -178,9 +179,10 @@ public class Server extends javax.swing.JFrame {
                                 .addGap(4, 4, 4)
                                 .addComponent(lb_name))
         );
-
         pack();
     }
+
+
 
     private void b_endActionPerformed(java.awt.event.ActionEvent evt) {
         try
@@ -263,9 +265,10 @@ public class Server extends javax.swing.JFrame {
         }
     }
 
+
     public void userAdd (String data)
     {
-        String message, add = ": :Connect", done = "Server: :Done", name = data;
+        String name = data, message,done = "Done:Server";
         ta_chat.append("Before " + name + " added. \n");
         users.add(name);
         ta_chat.append("After " + name + " added. \n");
@@ -274,25 +277,45 @@ public class Server extends javax.swing.JFrame {
 
         for (String token:tempList)
         {
-            message = (token + add);
-            tellEveryone(message);
+            message = ("Add:"+token);
+            sendOnlineList(message);
         }
-        tellEveryone(done);
+        sendOnlineList(done);
+
     }
 
     public void userRemove (String data)
     {
-        String message, add = ": :Connect", done = "Server: :Done", name = data;
+        String message, add = ": :Connect", done = "Done", name = data;
         users.remove(name);
         String[] tempList = new String[(users.size())];
         users.toArray(tempList);
 
         for (String token:tempList)
         {
-            message = (token + add);
-            tellEveryone(message);
+            message = ("Remove:"+token);
+            sendOnlineList(message);
         }
-        tellEveryone(done);
+        sendOnlineList(done);
+    }
+
+    //this function broadcasts the online users in the server to every client
+    public void sendOnlineList(String data){
+        Iterator it = clientOutputStreams.iterator();
+
+        while(it.hasNext()){
+            try
+            {
+                PrintWriter writer = (PrintWriter) it.next();
+                writer.println(data);
+                System.out.println("Sending:"+ data);
+                writer.flush();
+            }
+            catch (Exception ex)
+            {
+                ta_chat.append("Error telling everyone. \n");
+            }
+        }
     }
 
     //Sending data function
@@ -310,7 +333,6 @@ public class Server extends javax.swing.JFrame {
                 ta_chat.append("Sending: " + message + "\n");
                 writer.flush();
                 ta_chat.setCaretPosition(ta_chat.getDocument().getLength());
-
             }
             catch (Exception ex)
             {
@@ -331,14 +353,14 @@ public class Server extends javax.swing.JFrame {
 
         valid = connect.Login(username,password);
         if(valid){
+            //adding logged in users to the online array list.
+            userAdd(data[0]);
             //accDetails holds account details (username,rank,win,loss,coins,skins respectively)
             String[] accDetails;
             accDetails = connect.viewProfile(username);
             ta_chat.append(data[0]+" has successfully logged in");
             client.println(data[0]+" You have logged in, Welcome !" + ":Login"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]+ ":"+ accDetails[5]);
             client.flush();
-            //adding logged in users to the array list.
-            onlineStreams.add(client);
         }else{
             ta_chat.append(data[0]+" has failed to log in, Invalid Credentials");
             client.println(data[0]+" You have failed to log in, Invalid Credentials!" + ":Login");

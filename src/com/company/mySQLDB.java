@@ -158,12 +158,12 @@ public class mySQLDB {
 
                 //Display values
 //                System.out.println("UserID: " + ID);
-                System.out.println("Username: " + username);
+                /*System.out.println("Username: " + username);
                 System.out.println("Rank: " + rank);
                 System.out.println("Win: " + win);
                 System.out.println("Loss: " + loss);
                 System.out.println("Coins: " + coins);
-                System.out.println("Skin: " + skins);
+                System.out.println("Skin: " + skins);*/
 //                System.out.println("Status: " + status);
 //                System.out.println("Image: " + img);
 
