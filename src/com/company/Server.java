@@ -55,12 +55,11 @@ public class Server extends javax.swing.JFrame {
                         ta_chat.append(token + "\n");
                     }
                     //if user is valid connection
-                    if (data[2].equals(connect)) {
+                    if (data[2].equals(connect)) { //not use
                         System.out.println(data[2]);
                         tellEveryone((data[0] + ":" + data[1] + ":" + chat));
                         userAdd(data[0]);
-                    } else if (data[2].equals(connect)) {
-                        tellEveryone((data[0] + ": has disconnected." + ":" + chat));
+                    } else if (data[2].equals(disconnect)) {
                         userRemove(data[0]);
                     } else if (data[2].equals(chat)) {
                         tellEveryone(message);
@@ -273,15 +272,12 @@ public class Server extends javax.swing.JFrame {
     {
         String message, add = ": :Connect", done = "Done", name = data;
         users.remove(name);
+        ta_chat.append("After " + name + " remove from server. \n");
         String[] tempList = new String[(users.size())];
         users.toArray(tempList);
 
-        for (String token:tempList)
-        {
-            message = ("Remove:"+token);
-            sendOnlineList(message);
-        }
-        sendOnlineList(done);
+        message = ("Remove:"+name);
+        sendOnlineList(message);
     }
 
     public void userAdd(String data)
