@@ -43,7 +43,7 @@ public class Server extends javax.swing.JFrame {
 
             String message,
                     connect = "Connect", disconnect = "Disconnect",
-                    chat = "Chat", register = "Register", login = "Login";
+                    chat = "Chat", register = "Register", login = "Login", refresh = "Refresh";
 
             String[] data;
             try {
@@ -56,6 +56,7 @@ public class Server extends javax.swing.JFrame {
                     }
                     //if user is valid connection
                     if (data[2].equals(connect)) {
+                        System.out.println(data[2]);
                         tellEveryone((data[0] + ":" + data[1] + ":" + chat));
                         userAdd(data[0]);
                     } else if (data[2].equals(connect)) {
@@ -266,23 +267,7 @@ public class Server extends javax.swing.JFrame {
     }
 
 
-    public void userAdd (String data)
-    {
-        String name = data, message,done = "Done:Server";
-        ta_chat.append("Before " + name + " added. \n");
-        users.add(name);
-        ta_chat.append("After " + name + " added. \n");
-        String[] tempList = new String[(users.size())];
-        users.toArray(tempList);
 
-        for (String token:tempList)
-        {
-            message = ("Add:"+token);
-            sendOnlineList(message);
-        }
-        sendOnlineList(done);
-
-    }
 
     public void userRemove (String data)
     {
@@ -297,6 +282,25 @@ public class Server extends javax.swing.JFrame {
             sendOnlineList(message);
         }
         sendOnlineList(done);
+    }
+
+    public void userAdd(String data)
+    {
+        String name = data, message,done = "Done:Server";
+        ta_chat.append("Before " + name + " added. \n");
+        users.add(name);
+        ta_chat.append("After " + name + " added. \n");
+        String[] tempList = new String[(users.size())];
+        users.toArray(tempList);
+
+        //send message to clear client online user buffers before sending
+        sendOnlineList("Sending: Server");
+        for (String token:tempList)
+        {
+            message = ("Add:"+token);
+            sendOnlineList(message);
+        }
+
     }
 
     //this function broadcasts the online users in the server to every client
