@@ -5,7 +5,9 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by azkei on 16/03/2017.
@@ -16,7 +18,7 @@ public class Server extends javax.swing.JFrame {
     ArrayList clientOutputStreams;
     ArrayList<String> users;
     ArrayList onlineStreams;
-
+    OnlineListSingleton singleton;
 
     public class ClientHandler implements Runnable {
 
@@ -28,6 +30,7 @@ public class Server extends javax.swing.JFrame {
 
         public ClientHandler(Socket clientSocket, PrintWriter user) {
             client = user;
+            singleton.getInstance();
             try {
                 socket = clientSocket;
                 InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
@@ -43,7 +46,8 @@ public class Server extends javax.swing.JFrame {
 
             String message,
                     connect = "Connect", disconnect = "Disconnect",
-                    chat = "Chat", register = "Register", login = "Login", refresh = "Refresh";
+                    chat = "Chat", register = "Register", login = "Login",
+                    play = "Play", invite = "Invite";
 
             String[] data;
             try {
@@ -66,7 +70,14 @@ public class Server extends javax.swing.JFrame {
                     } else if(data[2].equals(register)){
                         registerUser(data[0] + ":" + data[1],client);
                     } else if(data[2].equals(login)){
-                        loginUser(data[0] + ":" + data[1],client);
+                        loginUser(data[0] + ":" + data[1],client,socket);
+                    }else if(data[3].equals(play)){
+                        //function that sends data to the client
+                        //System.out.println(data[0],data[1],data[2]);
+                    }else if(data[1].equals(invite)){
+                        //this should return the socket information
+                        //thats tied to the username
+                        sendClientInvite(singleton.fetchSocket(data[0]));
                     }else{
                         ta_chat.append("No conditions were met. \n");
                     }
@@ -220,6 +231,8 @@ public class Server extends javax.swing.JFrame {
 
     public static void main(String args[])
     {
+
+
         //instantiate SQL, and create tables
         mySQLDB connect = new mySQLDB();
         connect.createTable();
@@ -267,6 +280,17 @@ public class Server extends javax.swing.JFrame {
 
 
 
+    //this is to send a specific client an invitation
+    public  void sendClientInvite(Socket clientInfo){
+        try{
+            PrintWriter writer = new PrintWriter(clientInfo.getOutputStream());
+            writer.println("Hi client, i want to play you");
+            writer.flush();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+    }
 
     public void userRemove (String data)
     {
@@ -341,7 +365,9 @@ public class Server extends javax.swing.JFrame {
         }
     }
 
-    public void loginUser(String message, PrintWriter client){
+    public void loginUser(String message, PrintWriter client, Socket socket){
+
+
         mySQLDB connect = new mySQLDB();
         boolean valid;
 
@@ -350,6 +376,8 @@ public class Server extends javax.swing.JFrame {
 
         String username = data[0];
         String password = data[1];
+
+        singleton.addOnlinePair(username,socket);
 
         valid = connect.Login(username,password);
         if(valid){
