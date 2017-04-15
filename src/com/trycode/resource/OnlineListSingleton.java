@@ -1,4 +1,4 @@
-package com.company;
+package com.company.trycode.resource;
 
 import java.io.PrintWriter;
 import java.util.HashMap;

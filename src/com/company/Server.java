@@ -5,9 +5,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Created by azkei on 16/03/2017.
@@ -30,7 +28,7 @@ public class Server extends javax.swing.JFrame {
 
         public ClientHandler(Socket clientSocket, PrintWriter user) {
             client = user;
-            singleton.getInstance();
+
             try {
                 socket = clientSocket;
                 InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
@@ -44,12 +42,17 @@ public class Server extends javax.swing.JFrame {
         @Override
         public void run(){
 
+            singleton = OnlineListSingleton.getInstance();
+
             String message,
                     connect = "Connect", disconnect = "Disconnect",
                     chat = "Chat", register = "Register", login = "Login",
                     play = "Play", invite = "Invite";
 
             String[] data;
+
+
+
             try {
                 while ((message = reader.readLine()) != null) {
                     ta_chat.append("Received: " + message + "\n");
@@ -70,14 +73,16 @@ public class Server extends javax.swing.JFrame {
                     } else if(data[2].equals(register)){
                         registerUser(data[0] + ":" + data[1],client);
                     } else if(data[2].equals(login)){
-                        loginUser(data[0] + ":" + data[1],client,socket);
+                        loginUser(data[0] + ":" + data[1],client);
+                        //pair username to writer
+                        singleton.addOnlinePair(data[1],client);
                     }else if(data[3].equals(play)){
                         //function that sends data to the client
                         //System.out.println(data[0],data[1],data[2]);
                     }else if(data[1].equals(invite)){
                         //this should return the socket information
                         //thats tied to the username
-                        sendClientInvite(singleton.fetchSocket(data[0]));
+                        //sendClientInvite(singleton.fetchSocket(data[0]));
                     }else{
                         ta_chat.append("No conditions were met. \n");
                     }
@@ -260,6 +265,7 @@ public class Server extends javax.swing.JFrame {
             {
                 ServerSocket serverSock = new ServerSocket(2222);
 
+                //Listening mode
                 while (true)
                 {
                     Socket clientSock = serverSock.accept();
@@ -281,7 +287,7 @@ public class Server extends javax.swing.JFrame {
 
 
     //this is to send a specific client an invitation
-    public  void sendClientInvite(Socket clientInfo){
+    /*public  void sendClientInvite(PrintWriter clientInfo){
         try{
             PrintWriter writer = new PrintWriter(clientInfo.getOutputStream());
             writer.println("Hi client, i want to play you");
@@ -290,7 +296,7 @@ public class Server extends javax.swing.JFrame {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
     public void userRemove (String data)
     {
@@ -365,8 +371,7 @@ public class Server extends javax.swing.JFrame {
         }
     }
 
-    public void loginUser(String message, PrintWriter client, Socket socket){
-
+    public void loginUser(String message, PrintWriter client){
 
         mySQLDB connect = new mySQLDB();
         boolean valid;
@@ -377,7 +382,7 @@ public class Server extends javax.swing.JFrame {
         String username = data[0];
         String password = data[1];
 
-        singleton.addOnlinePair(username,socket);
+
 
         valid = connect.Login(username,password);
         if(valid){
@@ -396,8 +401,7 @@ public class Server extends javax.swing.JFrame {
         }
     }
 
-    public void
-    registerUser(String message, PrintWriter client){
+    public void registerUser(String message, PrintWriter client){
         mySQLDB connect = new mySQLDB();
         boolean valid;
         String[] data;
