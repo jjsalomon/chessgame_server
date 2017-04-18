@@ -43,7 +43,7 @@ public class Server extends javax.swing.JFrame {
 
             String message,
                     connect = "Connect", disconnect = "Disconnect",
-                    chat = "Chat", register = "Register", login = "Login", refresh = "Refresh";
+                    chat = "Chat", register = "Register", login = "Login", refresh = "Refresh", invite="Invite";
 
             String[] data;
             try {
@@ -65,8 +65,11 @@ public class Server extends javax.swing.JFrame {
                         tellEveryone(message);
                     } else if(data[2].equals(register)){
                         registerUser(data[0] + ":" + data[1],client);
-                    } else if(data[2].equals(login)){
-                        loginUser(data[0] + ":" + data[1],client);
+                    } else if(data[2].equals(login)) {
+                        loginUser(data[0] + ":" + data[1], client);
+                    }else if(data[2].equals(invite)){
+                            //add function here for to accept challenge then play a game/ or decline challenge
+                            System.out.println("\"someone\" wants to challenge you " + data[0]);
                     }else{
                         ta_chat.append("No conditions were met. \n");
                     }
