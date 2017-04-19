@@ -16,7 +16,7 @@ public class Server extends javax.swing.JFrame {
     ArrayList clientOutputStreams;
     ArrayList<String> users;
     ArrayList onlineStreams;
-
+    OnlineListSingleton singleton;
 
     public class ClientHandler implements Runnable {
 
@@ -28,6 +28,7 @@ public class Server extends javax.swing.JFrame {
 
         public ClientHandler(Socket clientSocket, PrintWriter user) {
             client = user;
+
             try {
                 socket = clientSocket;
                 InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
@@ -41,11 +42,17 @@ public class Server extends javax.swing.JFrame {
         @Override
         public void run(){
 
+            singleton = OnlineListSingleton.getInstance();
+
             String message,
                     connect = "Connect", disconnect = "Disconnect",
-                    chat = "Chat", register = "Register", login = "Login", refresh = "Refresh", invite="Invite";
+                    chat = "Chat", register = "Register", login = "Login",
+                    challenge = "Challenge", accept ="Accept", decline = "Decline";
 
             String[] data;
+
+
+
             try {
                 while ((message = reader.readLine()) != null) {
                     ta_chat.append("Received: " + message + "\n");
@@ -65,12 +72,46 @@ public class Server extends javax.swing.JFrame {
                         tellEveryone(message);
                     } else if(data[2].equals(register)){
                         registerUser(data[0] + ":" + data[1],client);
-                    } else if(data[2].equals(login)) {
-                        loginUser(data[0] + ":" + data[1], client);
-                    }else if(data[2].equals(invite)){
-                            //add function here for to accept challenge then play a game/ or decline challenge
-                            System.out.println("\"someone\" wants to challenge you " + data[0]);
-                    }else{
+                    } else if(data[2].equals(login)){
+                        loginUser(data[0] + ":" + data[1],client);
+                        //pair username to writer
+                        singleton.addOnlinePair(data[1],client);
+                    } else if(data[2].equals(challenge)){
+                        //this should return the socket information
+                        //thats tied to the username
+                        //@PARAM: Writer of challenged:challenged:challenger
+                        sendClientInvite(singleton.fetchSocket(data[0]),data[0],data[1]);
+                        System.out.println(data[0]+" is being challenged by "+data[1]);
+                        System.out.println(data[0]+" Socket Info: "+ singleton.fetchSocket(data[0]));
+                    }else if(data[0].equals(accept)){
+                        String challenger = data[1];
+                        String challenged = data[2];
+
+                        PrintWriter challengerWriter = singleton.fetchSocket(challenger);
+                        PrintWriter challengedWriter = singleton.fetchSocket(challenged);
+
+                        challengerWriter.println("START"+":"+challenger+":"+challenged);
+                        challengerWriter.flush();
+                        challengedWriter.println("START"+":"+challenger+":"+challenged);
+                        challengedWriter.flush();
+
+                        ta_chat.append("Match between "+challenger+" and "+challenged+" \n");
+
+
+                    }else if(data[0].equals(decline)){
+                        String challenger = data[1];
+                        String challenged = data[2];
+
+                        PrintWriter challengerWriter = singleton.fetchSocket(challenger);
+                        PrintWriter challengedWriter = singleton.fetchSocket(challenged);
+
+                        challengerWriter.println("DECLINED"+":"+challenger+":"+challenged);
+                        challengedWriter.println("DECLINED"+":"+challenger+":"+challenged);
+
+                        ta_chat.append("DECLINED between "+challenger+" and "+challenged+" \n");
+
+
+                    } else{
                         ta_chat.append("No conditions were met. \n");
                     }
                 }
@@ -223,6 +264,8 @@ public class Server extends javax.swing.JFrame {
 
     public static void main(String args[])
     {
+
+
         //instantiate SQL, and create tables
         mySQLDB connect = new mySQLDB();
         connect.createTable();
@@ -250,6 +293,7 @@ public class Server extends javax.swing.JFrame {
             {
                 ServerSocket serverSock = new ServerSocket(2222);
 
+                //Listening mode
                 while (true)
                 {
                     Socket clientSock = serverSock.accept();
@@ -270,6 +314,11 @@ public class Server extends javax.swing.JFrame {
 
 
 
+    //this is to send a specific client an invitation
+    public  void sendClientInvite(PrintWriter clientInfo, String challenged, String challenger){
+        clientInfo.println("Invite"+":"+challenged+":"+challenger);
+        clientInfo.flush();
+    }
 
     public void userRemove (String data)
     {
@@ -345,6 +394,7 @@ public class Server extends javax.swing.JFrame {
     }
 
     public void loginUser(String message, PrintWriter client){
+
         mySQLDB connect = new mySQLDB();
         boolean valid;
 
@@ -353,6 +403,8 @@ public class Server extends javax.swing.JFrame {
 
         String username = data[0];
         String password = data[1];
+
+
 
         valid = connect.Login(username,password);
         if(valid){
@@ -371,8 +423,7 @@ public class Server extends javax.swing.JFrame {
         }
     }
 
-    public void
-    registerUser(String message, PrintWriter client){
+    public void registerUser(String message, PrintWriter client){
         mySQLDB connect = new mySQLDB();
         boolean valid;
         String[] data;
