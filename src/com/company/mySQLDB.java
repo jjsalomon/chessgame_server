@@ -2,8 +2,11 @@ package com.company;
 
 import java.sql.*;
 
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
 /**
  * Created by Francis on 3/11/2017.
+ * Reference: for hashing password http://docs.spring.io/spring-security/site/docs/current/apidocs/org/springframework/security/crypto/bcrypt/BCrypt.html
  */
 
 /*REFERENCES:
@@ -14,13 +17,13 @@ import java.sql.*;
 
 public class mySQLDB {
 
+    //variable to use JDBC driver and creates a database url name chessmaster.db
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
-    private static final String DB_URL = "jdbc:sqlite:test.db";
+    private static final String DB_URL = "jdbc:sqlite:chessmaster.db";
 
-    //java sql variables
-    private Connection conn;
-    private PreparedStatement pstmt;
-    private ResultSet res;
+    private Connection conn; //to connect to the database
+    private PreparedStatement pstmt; //preparedStatement for sql statements
+    private ResultSet res; //acts as a cursor to traverse data in datbase
 
     //set up JDBC_driver
     public mySQLDB() {
@@ -31,6 +34,7 @@ public class mySQLDB {
         }
     }
 
+    //Function to initialise conn to getConnection
     public void getConnection() {
         try {
             conn = DriverManager.getConnection(DB_URL);
@@ -39,42 +43,41 @@ public class mySQLDB {
         }
     }
 
-    //Method to createTable
+    //Function to createTable account and profile
     public void createTable() {
         try {
-            //create connection to database
+            //calls function connection to database
             getConnection();
             //create preparedStatement
             pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS account(ID INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(20) NOT NULL UNIQUE, password VARCHAR(20) NOT NULL)");
-            pstmt.executeUpdate();
+            pstmt.executeUpdate(); //runs/execute pstmt
             pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS profile(userID INTEGER PRIMARY KEY AUTOINCREMENT, rank int(11) NOT NULL, win int(11) NOT NULL, loss int(11) NOT NULL, coins int(11) NOT NULL, username varchar(20) NOT NULL,skins varchar(20), FOREIGN KEY(username) REFERENCES account(username))");
             pstmt.executeUpdate();
-            //  , skin varchar(20) NOT NULL, status varchar(10),image BLOB
         } catch (Exception e) {
             //e.printStackTrace();
-            //System.out.println(e);
+            System.out.println(e);
         } finally {
+            //Calls function to close connection and resources
             closeRsc();
         }
     }
 
-    //Method for logging in
+    //Function for user login
     public boolean Login(String username, String password) {
         try {
-            //create connection to database
             getConnection();
-            //create preparedStatement
-            pstmt = conn.prepareStatement("SELECT * FROM account WHERE username = ? AND password = ?");
+            pstmt = conn.prepareStatement("SELECT * FROM account WHERE username = ?");
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
             res = pstmt.executeQuery();
-            //validation of account
-            if (res.next()) {
-                //int status = 1; 1 = online
-                //viewProfile(username);
-                //updateStatus(status,username);
-                //showOnline();
-                return true;
+            //validation of  user account
+            if (res.next()) { //if username is valid
+                String hashPW = res.getString("password");
+                if ((BCrypt.checkpw(password, hashPW))) {  //if user password match the hashpassword in database
+                    return true;
+                } else {
+                    return false;
+                }
+
             } else {
                 return false;
             }
@@ -86,25 +89,22 @@ public class mySQLDB {
 
     }
 
-    //Method to create account and profile /create data
-    public boolean insertData(String username, String password) { //need to add parameters for getting input from user
+    //Method to create/register account and profile for user /create data of user
+    public boolean insertData(String username, String password) {
         try {
             getConnection();
-            //create account
-            pstmt = conn.prepareStatement("INSERT INTO account(username,password) VALUES(?,?)");
+            String pw_hash = BCrypt.hashpw(password, BCrypt.gensalt()); //hash/BCrypt the password
+            pstmt = conn.prepareStatement("INSERT INTO account(username,password) VALUES(?,?)");         //create account statement
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
-            int row = pstmt.executeUpdate();
-            //validate if registration account succeed return greater than 0
+            pstmt.setString(2, pw_hash);
+            int row = pstmt.executeUpdate(); //validate if registration account succeed return row greater than 0
             if (row > 0) {
-                //create profile // initialise to 0 .. dummy numbers for now
-                int rank = 1;
-                int win = 11;
-                int loss = 2;
-                int coins = 11340;
+                //create profile, user details initialise as 0
+                int rank = 0;
+                int win = 0;
+                int loss = 0;
+                int coins = 0;
                 String skins = "";
-                String status = "";
-                String img = "";
                 pstmt = conn.prepareStatement("INSERT INTO profile(rank,win,loss,coins,username,skins) VALUES(?,?,?,?,?,?)");
                 pstmt.setInt(1, rank);
                 pstmt.setInt(2, win);
@@ -112,10 +112,7 @@ public class mySQLDB {
                 pstmt.setInt(4, coins);
                 pstmt.setString(5, username);
                 pstmt.setString(6, skins);
-//                pstmt.setString(7, status);
-//                pstmt.setString(8, img);
-                row = pstmt.executeUpdate();
-                //validate profile creation
+                row = pstmt.executeUpdate();                 //validate profile creation, return row greater than 0
                 if (row > 0) {
                     return true;
                 } else {
@@ -133,128 +130,120 @@ public class mySQLDB {
         }
     }
 
-    //Method to view selected user profile /read data
-    //server should be able to send this back to client
+    //Method to view selected user profile /read data of user
     public String[] viewProfile(String username) {
         try {
             getConnection();
             pstmt = conn.prepareStatement("SELECT * FROM profile WHERE username = ?");
             pstmt.setString(1, username);
             res = pstmt.executeQuery();
-
             //Extract data from result set
-            //loop through database (cursor)
             if (res.next()) {
                 System.out.println(username + " profile");
-                //Retrieve by column name
-//                int ID = res.getInt("userID");
+                //Retrieve by column name and stored in variables
                 int rank = res.getInt("rank");
                 int win = res.getInt("win");
                 int loss = res.getInt("loss");
                 int coins = res.getInt("coins");
                 String skins = res.getString("skins");
-//                String status = res.getString("status");
-//                String img = res.getString("image");
-
-                //Display values
-//                System.out.println("UserID: " + ID);
-                /*System.out.println("Username: " + username);
-                System.out.println("Rank: " + rank);
-                System.out.println("Win: " + win);
-                System.out.println("Loss: " + loss);
-                System.out.println("Coins: " + coins);
-                System.out.println("Skin: " + skins);*/
-//                System.out.println("Status: " + status);
-//                System.out.println("Image: " + img);
-
-                return new String[] { username, String.valueOf(rank), String.valueOf(win), String.valueOf(loss), String.valueOf(coins),skins};
+                return new String[]{username, String.valueOf(rank), String.valueOf(win), String.valueOf(loss), String.valueOf(coins), skins};
             } else {
-                return new String[] { "" };
+                return new String[]{""};
             }
         } catch (Exception e) {
-            return new String[] { "" };
+            return new String[]{""};
         } finally {
             closeRsc();
         }
     }
 
-    //update data after game method here!!
-
-
-    //Method to update profile /update data /not done yet until we have game
-    public boolean updateStatus(int status, String username) { //<<-int status//need an if statement for offline and online be done after the former is working
+    //Function to update Win or loss of the players
+    public void updateWinLoss(boolean result, String username) {
         try {
-            getConnection();
-            pstmt = conn.prepareStatement("UPDATE profile SET status = ? WHERE username = ?");
-            //if(status == 1){
-                pstmt.setString(1, "online");
-            //}
-//            else{
-//                pstmt.setString(1, "offline");
-//            }
-            pstmt.setString(2, username);
-            int row = pstmt.executeUpdate();
-            if (row > 0) {
-                return true;
-            } else {
-                return false;
-            }
-            //System.out.println("Update Complete");
-        } catch (SQLException e) {
-            return false;
-        } finally {
-            closeRsc();
-        }
-    }
+            int win = 0;
+            int loss = 0;
 
-    public void showOnline() {
-        try {
             getConnection();
-            pstmt = conn.prepareStatement("SELECT username FROM profile WHERE status = ?");
-            pstmt.setString(1, "online");
+            pstmt = conn.prepareStatement("SELECT win,loss FROM profile WHERE username = ?"); //statement to get user win and loss
+            pstmt.setString(1, username);
             res = pstmt.executeQuery();
-
-            //Extract data from result set
-            //loop through database (cursor)
-            while (res.next()) {
-                String username = res.getString("username");
-                int rank = res.getInt("rank");
-
-                //Display values//send back with like the profile
-                System.out.println("Username: " + username);
-                System.out.println("Rank: " + rank);
+            if (res.next()) {
+                win = res.getInt("win");
+                loss = res.getInt("loss");
             }
-        } catch (Exception e) {
 
+            if (result) { //if result = true = win
+                pstmt = conn.prepareStatement("UPDATE profile SET win = ? WHERE username = ?");
+                win = win + 1;
+                pstmt.setInt(1, win);
+                pstmt.setString(2, username);
+            } else { //if result = false = loss
+                pstmt = conn.prepareStatement("UPDATE profile SET loss = ? WHERE username = ?");
+                loss = loss + 1;
+                pstmt.setInt(1, loss);
+                pstmt.setString(2, username);
+            }
+            int row = pstmt.executeUpdate();
+
+            if (row > 0) {
+                System.out.println("Update Complete");
+            } else {
+                System.out.println("Update error");
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e);
         } finally {
             closeRsc();
         }
     }
+
+    //Function to update all rank of the players
+    public void updataRank() {
+        try {
+            Statement stmt; //variable for a statement
+            getConnection();
+            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE); //use different types of resultset to be able to update database
+            ResultSet ursRank = stmt.executeQuery("SELECT * RANK() over(order by ((win+loss)/2) desc)newRank From profile;"); //query to set new rank of each players base on win and loss
+            while (ursRank.next()) { // updates all the rank of players
+                int newRank = ursRank.getInt("newRank");
+                ursRank.updateInt("rank", newRank);
+                ursRank.updateRow();
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        } finally {
+            closeRsc();
+        }
+    }
+
 
     //Method to delete account and profile /delete data
-    public boolean deleteData(String username) {
-        try {//!! if account is deleted  profile should be deleted too!
+    public void deleteData(String username) {
+        //if account is deleted  profile should be deleted too!
+        try {
             getConnection();
-
             //deletes profile
             pstmt = conn.prepareStatement("DELETE FROM profile WHERE username = ?");
             pstmt.setString(1, username);
             int row = pstmt.executeUpdate();
             if (row > 0) {
+                System.out.println("Deleted Profile");
+
                 //deletes account
                 pstmt = conn.prepareStatement("DELETE FROM account WHERE username= ?");
                 pstmt.setString(1, username);
                 row = pstmt.executeUpdate();
                 if (row > 0) {
-                    return true;
+                    System.out.println("Deleted account");
                 } else {
-                    return false;
+                    System.out.println("error");
                 }
             } else {
-                return false;
+                System.out.println("error");
             }
         } catch (SQLException e) {
-            return false;
+            System.out.println(e);
         } finally {
             closeRsc();
         }
