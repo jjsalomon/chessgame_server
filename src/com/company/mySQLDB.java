@@ -1,7 +1,6 @@
 package com.company;
 
 import java.sql.*;
-
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 /**

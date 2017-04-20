@@ -1,7 +1,9 @@
 <component name="libraryTable">
   <library name="sqlite-jdbc-3.16.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/Downloads/sqlite-jdbc-3.16.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../Global Classroom/dependencies/sqlite-jdbc-3.16.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../Global Classroom/dependencies/spring-security-crypto-3.1.0.RELEASE.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../Global Classroom/dependencies/mysql-connector-java-5.1.41-bin.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

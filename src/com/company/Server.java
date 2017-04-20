@@ -47,7 +47,8 @@ public class Server extends javax.swing.JFrame {
             String message,
                     connect = "Connect", disconnect = "Disconnect",
                     chat = "Chat", register = "Register", login = "Login",
-                    challenge = "Challenge", accept ="Accept", decline = "Decline";
+                    challenge = "Challenge", accept ="Accept", decline = "Decline",
+                    move = "Move";
 
             String[] data;
 
@@ -80,6 +81,7 @@ public class Server extends javax.swing.JFrame {
                         //this should return the socket information
                         //thats tied to the username
                         //@PARAM: Writer of challenged:challenged:challenger
+                        //Data coming in: challenged:challenger:Challenge
                         sendClientInvite(singleton.fetchSocket(data[0]),data[0],data[1]);
                         System.out.println(data[0]+" is being challenged by "+data[1]);
                         System.out.println(data[0]+" Socket Info: "+ singleton.fetchSocket(data[0]));
@@ -109,9 +111,21 @@ public class Server extends javax.swing.JFrame {
                         challengedWriter.println("DECLINED"+":"+challenger+":"+challenged);
 
                         ta_chat.append("DECLINED between "+challenger+" and "+challenged+" \n");
+                    }else if(data[0].equals(move)){
+                        //data coming in into readable strings
+                        //challenger
+                        String fromClient = data[1];
+                        //challenged
+                        String toClient = data[2];
+                        String sourceTile = data[3];
+                        String destinationTile = data[4];
 
+                        //sending to the other client
+                        //PrintWriter toClientWriter = singleton.fetchSocket(toClient);
+                        //toClientWriter.println("Move"+":"+fromClient+":"+toClient+":"+sourceTile+":"+destinationTile);
+                        //toClientWriter.flush();
 
-                    } else{
+                    }else{
                         ta_chat.append("No conditions were met. \n");
                     }
                 }
