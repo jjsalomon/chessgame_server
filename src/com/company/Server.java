@@ -411,6 +411,7 @@ public class Server extends javax.swing.JFrame {
 
         mySQLDB connect = new mySQLDB();
         boolean valid;
+        boolean isLogin = false; //if false the user is not log in,
 
         String[] data;
         data = message.split(":");
@@ -418,22 +419,36 @@ public class Server extends javax.swing.JFrame {
         String username = data[0];
         String password = data[1];
 
+        String[] tempList = new String[(users.size())];
+        users.toArray(tempList);
 
+        for (String token:tempList)
+        {
+           if(token.equals(username)){
+               ta_chat.append(username+" is already log in");
+/*               client.println(username + ":You have failed to log in, ALREADY log in" + ":isLogin");
+               client.flush();*/
+               isLogin = true; //if true user is already login
+               break;
+           }
+        }
 
-        valid = connect.Login(username,password);
-        if(valid){
-            //adding logged in users to the online array list.
-            userAdd(data[0]);
-            //accDetails holds account details (username,rank,win,loss,coins,skins respectively)
-            String[] accDetails;
-            accDetails = connect.viewProfile(username);
-            ta_chat.append(data[0]+" has successfully logged in");
-            client.println(data[0]+" You have logged in, Welcome !" + ":Login"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]+ ":"+ accDetails[5]);
-            client.flush();
-        }else{
-            ta_chat.append(data[0]+" has failed to log in, Invalid Credentials");
-            client.println(data[0]+" You have failed to log in, Invalid Credentials!" + ":Login");
-            client.flush();
+        if (!isLogin) {
+            valid = connect.Login(username,password);
+            if(valid){
+                //adding logged in users to the online array list.
+                userAdd(data[0]);
+                //accDetails holds account details (username,rank,win,loss,coins,skins respectively)
+                String[] accDetails;
+                accDetails = connect.viewProfile(username);
+                ta_chat.append(data[0]+" has successfully logged in");
+                client.println(data[0]+" You have logged in, Welcome !" + ":Login"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]+ ":"+ accDetails[5]);
+                client.flush();
+            }else{
+                ta_chat.append(data[0]+" has failed to log in, Invalid Credentials");
+                client.println(data[0]+" You have failed to log in, Invalid Credentials!" + ":Login");
+                client.flush();
+            }
         }
     }
 
