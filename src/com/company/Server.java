@@ -38,7 +38,6 @@ public class Server extends javax.swing.JFrame {
             }
         }
 
-
         @Override
         public void run(){
 
@@ -51,9 +50,6 @@ public class Server extends javax.swing.JFrame {
                     move = "Move";
 
             String[] data;
-
-
-
             try {
                 while ((message = reader.readLine()) != null) {
                     ta_chat.append("Received: " + message + "\n");
@@ -278,8 +274,6 @@ public class Server extends javax.swing.JFrame {
 
     public static void main(String args[])
     {
-
-
         //instantiate SQL, and create tables
         mySQLDB connect = new mySQLDB();
         connect.createTable();
@@ -325,8 +319,6 @@ public class Server extends javax.swing.JFrame {
             }
         }
     }
-
-
 
     //this is to send a specific client an invitation
     public  void sendClientInvite(PrintWriter clientInfo, String challenged, String challenger){
@@ -411,7 +403,7 @@ public class Server extends javax.swing.JFrame {
 
         mySQLDB connect = new mySQLDB();
         boolean valid;
-        boolean isLogin = false; //if false the user is not log in,
+        boolean isLogin = false; //if false, the user is not log in,
 
         String[] data;
         data = message.split(":");
@@ -419,20 +411,23 @@ public class Server extends javax.swing.JFrame {
         String username = data[0];
         String password = data[1];
 
+        //Checks if user is already login
         String[] tempList = new String[(users.size())];
         users.toArray(tempList);
 
         for (String token:tempList)
         {
+            //Checks if user is already login
            if(token.equals(username)){
+               isLogin = true; //if true, user is already login
                ta_chat.append(username+" is already log in");
-/*               client.println(username + ":You have failed to log in, ALREADY log in" + ":isLogin");
-               client.flush();*/
-               isLogin = true; //if true user is already login
+               client.println(data[0] + ":CheckLogin");
+               client.flush();
                break;
            }
         }
 
+        //if user is not log in, validates account and then log in
         if (!isLogin) {
             valid = connect.Login(username,password);
             if(valid){
