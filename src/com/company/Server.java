@@ -121,9 +121,9 @@ public class Server extends javax.swing.JFrame {
                         String destinationTile = data[4];
 
                         //sending to the other client
-                        //PrintWriter toClientWriter = singleton.fetchSocket(toClient);
-                        //toClientWriter.println("Move"+":"+fromClient+":"+toClient+":"+sourceTile+":"+destinationTile);
-                        //toClientWriter.flush();
+                        PrintWriter toClientWriter = singleton.fetchSocket(toClient);
+                        toClientWriter.println("Move"+":"+fromClient+":"+toClient+":"+sourceTile+":"+destinationTile);
+                        toClientWriter.flush();
 
                     }else{
                         ta_chat.append("No conditions were met. \n");

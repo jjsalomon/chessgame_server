@@ -11,9 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="mysql-connector-java-5.1.41-bin" level="application" />
     <orderEntry type="library" name="src" level="project" />
-    <orderEntry type="library" name="sqlite-jdbc-3.16.1" level="project" />
-    <orderEntry type="library" name="spring-security-crypto-3.1.0.RELEASE" level="project" />
+    <orderEntry type="library" name="mysql-connector-java-5.1.41-bin" level="project" />
   </component>
 </module>
