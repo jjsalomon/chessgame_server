@@ -50,7 +50,7 @@ public class mySQLDB {
             //create preparedStatement
             pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS account(ID INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(20) NOT NULL UNIQUE, password VARCHAR(20) NOT NULL)");
             pstmt.executeUpdate(); //runs/execute pstmt
-            pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS profile(userID INTEGER PRIMARY KEY AUTOINCREMENT, rank int(11) NOT NULL, win int(11) NOT NULL, loss int(11) NOT NULL, coins int(11) NOT NULL, username varchar(20) NOT NULL,skins varchar(20), FOREIGN KEY(username) REFERENCES account(username))");
+            pstmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS profile(userID INTEGER PRIMARY KEY AUTOINCREMENT, rank int(11) NOT NULL, win int(11) NOT NULL, loss int(11) NOT NULL, coins int(11) NOT NULL, username varchar(20) NOT NULL, FOREIGN KEY(username) REFERENCES account(username))");
             pstmt.executeUpdate();
         } catch (Exception e) {
             //e.printStackTrace();
@@ -104,13 +104,13 @@ public class mySQLDB {
                 int loss = 0;
                 int coins = 0;
                 String skins = "";
-                pstmt = conn.prepareStatement("INSERT INTO profile(rank,win,loss,coins,username,skins) VALUES(?,?,?,?,?,?)");
+                pstmt = conn.prepareStatement("INSERT INTO profile(rank,win,loss,coins,username) VALUES(?,?,?,?,?)");
                 pstmt.setInt(1, rank);
                 pstmt.setInt(2, win);
                 pstmt.setInt(3, loss);
                 pstmt.setInt(4, coins);
                 pstmt.setString(5, username);
-                pstmt.setString(6, skins);
+//                pstmt.setString(6, skins);
                 row = pstmt.executeUpdate();                 //validate profile creation, return row greater than 0
                 if (row > 0) {
                     return true;
@@ -144,8 +144,8 @@ public class mySQLDB {
                 int win = res.getInt("win");
                 int loss = res.getInt("loss");
                 int coins = res.getInt("coins");
-                String skins = res.getString("skins");
-                return new String[]{username, String.valueOf(rank), String.valueOf(win), String.valueOf(loss), String.valueOf(coins), skins};
+//                String skins = res.getString("skins");
+                return new String[]{username, String.valueOf(rank), String.valueOf(win), String.valueOf(loss), String.valueOf(coins)};
             } else {
                 return new String[]{""};
             }

@@ -433,18 +433,23 @@ public class Server extends javax.swing.JFrame {
             if(valid){
                 //adding logged in users to the online array list.
                 userAdd(data[0]);
-                //accDetails holds account details (username,rank,win,loss,coins,skins respectively)
-                String[] accDetails;
-                accDetails = connect.viewProfile(username);
-                ta_chat.append(data[0]+" has successfully logged in");
-                client.println(data[0]+" You have logged in, Welcome !" + ":Login"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]+ ":"+ accDetails[5]);
-                client.flush();
+                getProfile(username, client);
             }else{
                 ta_chat.append(data[0]+" has failed to log in, Invalid Credentials");
-                client.println(data[0]+" You have failed to log in, Invalid Credentials!" + ":Login");
+                client.println(data[0] + ":CheckLogin");
                 client.flush();
             }
         }
+    }
+
+    public void getProfile(String username,PrintWriter client){
+        mySQLDB connect = new mySQLDB();
+        //accDetails holds account details (username,rank,win,loss,coins,skins respectively)
+        String[] accDetails;
+        accDetails = connect.viewProfile(username);
+        ta_chat.append(username+" has successfully logged in");
+        client.println(username+" You have logged in, Welcome !" + ":Login"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]);
+        client.flush();
     }
 
     public void registerUser(String message, PrintWriter client){
@@ -465,7 +470,7 @@ public class Server extends javax.swing.JFrame {
             //If insert failed
             System.out.println("Register fail");
             ta_chat.append(data[0]+" has failed to register");
-            client.println(data[0]+" has failed to register."+":Message");
+            client.println(data[0]+" has failed to register."+":CheckRegister");
             client.flush();
         }
     }
