@@ -47,7 +47,7 @@ public class Server extends javax.swing.JFrame {
                     connect = "Connect", disconnect = "Disconnect",
                     chat = "Chat", register = "Register", login = "Login",
                     challenge = "Challenge", accept ="Accept", decline = "Decline",
-                    move = "Move";
+                    move = "Move", interrupt = "Interrupt";
 
             String[] data;
             try {
@@ -121,6 +121,23 @@ public class Server extends javax.swing.JFrame {
                         toClientWriter.println("Move"+":"+fromClient+":"+toClient+":"+sourceTile+":"+destinationTile);
                         toClientWriter.flush();
 
+                    }else if(data[0].equals(interrupt)){
+
+                        //set challenger challenged
+                        String disconnectUser = data[1];
+                        String client1 = data[2];
+                        String client2 = data[3];
+
+                        //remove the disconnected client - send new list to every client
+                        userRemove(disconnectUser);
+
+                        //writers
+                        PrintWriter clientwriter1 = singleton.fetchSocket(client1);
+                        clientwriter1.println("Interrupt:Interrupt:Interrupt");
+                        clientwriter1.flush();
+                        PrintWriter clientwriter2 = singleton.fetchSocket(client2);
+                        clientwriter2.println("Interrupt:Interrupt:Interrupt");
+                        clientwriter2.flush();
                     }else{
                         ta_chat.append("No conditions were met. \n");
                     }

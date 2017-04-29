@@ -53,6 +53,10 @@ public final class OnlineListSingleton {
         return map.get(username);
     }
 
+    public void deletePair(String username){
+
+    }
+
 
 
 }
