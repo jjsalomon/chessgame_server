@@ -47,7 +47,7 @@ public class Server extends javax.swing.JFrame {
                     connect = "Connect", disconnect = "Disconnect",
                     chat = "Chat", register = "Register", login = "Login",
                     challenge = "Challenge", accept ="Accept", decline = "Decline",
-                    move = "Move", interrupt = "Interrupt";
+                    move = "Move", interrupt = "Interrupt", win = "Win";
 
             String[] data;
             try {
@@ -138,6 +138,19 @@ public class Server extends javax.swing.JFrame {
                         PrintWriter clientwriter2 = singleton.fetchSocket(client2);
                         clientwriter2.println("Interrupt:Interrupt:Interrupt");
                         clientwriter2.flush();
+                    }else if(data[0].equals(win)){
+
+                        String winner = data[1];
+                        String loser = data[3];
+
+                        //writers
+                        PrintWriter winWriter = singleton.fetchSocket(winner);
+                        winWriter.println("Win"+":"+loser+":"+"Congratulations You Have Won");
+                        winWriter.flush();
+
+                        PrintWriter loseWriter = singleton.fetchSocket(loser);
+                        loseWriter.println("Lose"+":"+winner+":"+"Sorry you lost");
+                        loseWriter.flush();
                     }else{
                         ta_chat.append("No conditions were met. \n");
                     }
