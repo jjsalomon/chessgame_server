@@ -1,6 +1,7 @@
 package com.company;
 
 import java.sql.*;
+
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 /**
@@ -185,7 +186,7 @@ public class mySQLDB {
             int row = pstmt.executeUpdate();
 
             if (row > 0) {
-                System.out.println("Update Complete");
+                System.out.println(username+" Update Win or Loss Complete");
             } else {
                 System.out.println("Update error");
             }
@@ -202,12 +203,39 @@ public class mySQLDB {
         try {
             Statement stmt; //variable for a statement
             getConnection();
-            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE); //use different types of resultset to be able to update database
-            ResultSet ursRank = stmt.executeQuery("SELECT * RANK() over(order by (win/(win+loss)) desc)newRank From profile;"); //query to set new rank of each players base on win and loss
-            while (ursRank.next()) { // updates all the rank of players
-                int newRank = ursRank.getInt("newRank");
-                ursRank.updateInt("rank", newRank);
-                ursRank.updateRow();
+            float winpercentage;
+            int rank = 0;
+            float temp = 0;
+            String user;
+            pstmt = conn.prepareStatement("UPDATE profile SET rank = ? WHERE username = ?");
+            stmt = conn.createStatement();
+            ResultSet ursRank = stmt.executeQuery("select username,(1.0*win/(win+loss))as winpercent from profile order by winpercent Desc;"); //query to set new rank of each players base on winning percentage
+            // updates all the rank of players by winning percentage //inefficient with larger database
+            while (ursRank.next()) {
+                winpercentage = ursRank.getFloat("winpercent");
+                user= ursRank.getString("username");
+                if (winpercentage != temp) { //update rank by from highest win percentage
+                    temp = winpercentage;
+                    rank = rank+1;
+                    pstmt.setInt(1, rank);
+                    pstmt.setString(2, user);
+                    int row = pstmt.executeUpdate();
+                    if (row > 0) {
+                        System.out.println(user+" Update Complete");
+                    } else {
+                        System.out.println("Update error");
+                    }
+                } else { //if two or more user winpercentage are the same they will share rank
+                    temp = winpercentage;
+                    pstmt.setInt(1, rank);
+                    pstmt.setString(2, user);
+                    int row = pstmt.executeUpdate();
+                    if (row > 0) {
+                        System.out.println(user+" Update Complete shared rank");
+                    } else {
+                        System.out.println("Update error");
+                    }
+                }
             }
         } catch (SQLException e) {
             System.out.println(e);

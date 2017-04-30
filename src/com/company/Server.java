@@ -503,6 +503,7 @@ public class Server extends javax.swing.JFrame {
 
         connect.updateWinLoss(win,winner);
         connect.updateWinLoss(loss,loser);
+        connect.updataRank();
     }
 
     public void registerUser(String message, PrintWriter client){
