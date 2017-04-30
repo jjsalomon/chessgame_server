@@ -140,15 +140,28 @@ public class Server extends javax.swing.JFrame {
                         clientwriter2.flush();
                     }else if(data[0].equals(win)){
 
+                        mySQLDB connector = new mySQLDB();
+                        String[] accDetails;
                         String winner = data[1];
                         String loser = data[3];
 
+                        //update win or loss account data
+                        updateAccountData(winner,loser);
+
                         //writers
                         PrintWriter winWriter = singleton.fetchSocket(winner);
+
+                        accDetails = connector.viewProfile(winner);
+                        winWriter.println(winner + ":ReUpdate"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]);
+                        winWriter.flush();
                         winWriter.println("Win"+":"+loser+":"+"Congratulations You Have Won");
                         winWriter.flush();
 
+
                         PrintWriter loseWriter = singleton.fetchSocket(loser);
+                        accDetails = connector.viewProfile(loser);
+                        loseWriter.println(loser + ":ReUpdate"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]);
+                        loseWriter.flush();
                         loseWriter.println("Lose"+":"+winner+":"+"Sorry you lost");
                         loseWriter.flush();
                     }else{
@@ -480,6 +493,16 @@ public class Server extends javax.swing.JFrame {
         ta_chat.append(username+" has successfully logged in");
         client.println(username+" You have logged in, Welcome !" + ":Login"+ ":"+ accDetails[0] + ":"+ accDetails[1] + ":"+ accDetails[2] + ":"+ accDetails[3] + ":"+ accDetails[4]);
         client.flush();
+    }
+
+    //Function to update winner and loser win and loss data
+    public void updateAccountData(String winner, String loser){
+        mySQLDB connect = new mySQLDB();
+        boolean win = true;
+        boolean loss = false;
+
+        connect.updateWinLoss(win,winner);
+        connect.updateWinLoss(loss,loser);
     }
 
     public void registerUser(String message, PrintWriter client){

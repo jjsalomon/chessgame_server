@@ -203,7 +203,7 @@ public class mySQLDB {
             Statement stmt; //variable for a statement
             getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE); //use different types of resultset to be able to update database
-            ResultSet ursRank = stmt.executeQuery("SELECT * RANK() over(order by ((win+loss)/2) desc)newRank From profile;"); //query to set new rank of each players base on win and loss
+            ResultSet ursRank = stmt.executeQuery("SELECT * RANK() over(order by (win/(win+loss)) desc)newRank From profile;"); //query to set new rank of each players base on win and loss
             while (ursRank.next()) { // updates all the rank of players
                 int newRank = ursRank.getInt("newRank");
                 ursRank.updateInt("rank", newRank);
