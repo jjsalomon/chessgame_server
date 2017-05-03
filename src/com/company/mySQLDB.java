@@ -104,14 +104,12 @@ public class mySQLDB {
                 int win = 0;
                 int loss = 0;
                 int coins = 0;
-                String skins = "";
                 pstmt = conn.prepareStatement("INSERT INTO profile(rank,win,loss,coins,username) VALUES(?,?,?,?,?)");
                 pstmt.setInt(1, rank);
                 pstmt.setInt(2, win);
                 pstmt.setInt(3, loss);
                 pstmt.setInt(4, coins);
                 pstmt.setString(5, username);
-//                pstmt.setString(6, skins);
                 row = pstmt.executeUpdate();                 //validate profile creation, return row greater than 0
                 if (row > 0) {
                     return true;
@@ -145,7 +143,6 @@ public class mySQLDB {
                 int win = res.getInt("win");
                 int loss = res.getInt("loss");
                 int coins = res.getInt("coins");
-//                String skins = res.getString("skins");
                 return new String[]{username, String.valueOf(rank), String.valueOf(win), String.valueOf(loss), String.valueOf(coins)};
             } else {
                 return new String[]{""};
